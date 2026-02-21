@@ -27,7 +27,6 @@ def on_touch_down(self, touch):
     if touch.x < self.width / 2:
         self.current_speed_x = self.speed_x
     else:
-        print("Right side")
         self.current_speed_x = -self.speed_x
 
 def on_touch_up(self, touch):
