@@ -1,6 +1,40 @@
+#: import menu menu
+#: import restart restart
 MainUi:
 
 
 <MainUi>:
     perspective_point_x: self.width / 2
     perspective_point_y: self.height * 0.75
+    menu: menu_ui
+    restart: restart_ui
+    canvas.before:
+        Rectangle:
+            pos: self.pos
+            size: self.size
+            source: "assets/images/bg1.jpg"
+    Label:
+        id: score_label
+        text: "Score: " + str(root.high_score)
+        font_name: "assets/fonts/Sackers-Gothic-Std-Light.ttf"
+        font_size: "28dp"
+        color: 1, 1, 1, 1
+        size_hint: 0.3, 0.1
+        pos_hint: {"x": 0, "top": 0.9}
+        opacity: 1 if root.game_started and not root.game_over_state else 0
+    Button:
+        id: pause_btn
+        size_hint: None, None
+        size: "50dp", "50dp"
+        pos_hint: {"right": 0.99, "top": 0.97}
+        opacity: 1 if root.game_started and not root.game_over_state else 0
+        disabled: not (root.game_started and not root.game_over_state)
+        background_normal: "assets/images/pause_bars_icon_1771746320371.png"
+        background_down: "assets/images/pause_bars_icon_1771746320371.png"
+        background_color: 0, 0, 0, 0
+        on_press: root.toggle_pause()
+    MenuUi:
+        id: menu_ui
+    RestartScreen:
+        id: restart_ui
+    

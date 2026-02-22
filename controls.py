@@ -1,4 +1,5 @@
 from kivy import platform
+from kivy.uix.relativelayout import RelativeLayout
 
 def is_desktop(self):
         if platform in ("linux" , "win" , "macosx"):
@@ -24,10 +25,12 @@ def on_keyboard_up(self, keyboard, keycode):
     return True
 
 def on_touch_down(self, touch):
-    if touch.x < self.width / 2:
-        self.current_speed_x = self.speed_x
-    else:
-        self.current_speed_x = -self.speed_x
+    if self.game_started and not self.game_over_state:
+        if touch.x < self.width / 2:
+            self.current_speed_x = self.speed_x
+        else:
+            self.current_speed_x = -self.speed_x
+    return super(RelativeLayout , self).on_touch_down(touch)
 
 def on_touch_up(self, touch):
     self.current_speed_x = 0

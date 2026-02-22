@@ -1,0 +1,113 @@
+<RestartScreen>:
+    opacity: 0
+    # Main content — centered
+    BoxLayout:
+        orientation: "vertical"
+        # Increased height from 0.5 to 0.65 to give the UI breathing room
+        size_hint: 0.75, 0.65 
+        pos_hint: {"center_x": 0.5, "center_y": 0.5}
+        spacing: "12dp" # Slightly reduced to prevent overflow
+
+        # GAME OVER title
+        Label:
+            text: "G A M E   O V E R"
+            font_size: "42dp"
+            bold: True
+            color: 1, 1, 1, 1
+            size_hint_y: 0.3 # Reduced from 0.35
+            halign: "center"
+            valign: "bottom"
+            text_size: self.size
+
+        # Blue accent line
+        Widget:
+            size_hint_y: None
+            height: "3dp"
+            canvas:
+                Color:
+                    rgba: 0.2, 0.3, 1, 1
+                RoundedRectangle:
+                    pos: self.center_x - dp(60), self.y
+                    size: dp(120), dp(3)
+                    radius: [2]
+
+        # Subtitle
+        Label:
+            text: "T H E   C O S M O S   A W A I T S"
+            font_size: "13dp"
+            color: 0.6, 0.6, 0.75, 0.7
+            size_hint_y: 0.1
+            halign: "center"
+            valign: "top"
+            text_size: self.size
+
+        # High score
+        Label:
+            text: "HIGH SCORE: " + str(root.parent.high_score)
+            font_size: "26dp"
+            bold: True
+            color: 1, 0.85, 0.2, 1
+            size_hint_y: 0.15 # Increased slightly to center text better
+            halign: "center"
+            valign: "middle"
+            text_size: self.size
+
+        # RESTART button — rounded neon blue
+        AnchorLayout:
+            anchor_x: "center"
+            size_hint_y: 0.2 # Adjusted to balance proportions
+
+            Button:
+                text: "R E S T A R T"
+                font_size: "22dp"
+                bold: True
+                size_hint: 0.65, 1
+                color: 1, 1, 1, 1
+                background_color: 0, 0, 0, 0
+                background_normal: ""
+                on_press: root.parent.game_start()
+                canvas.before:
+                    Color:
+                        rgba: 0.18, 0.22, 0.95, 1
+                    RoundedRectangle:
+                        pos: self.pos
+                        size: self.size
+                        radius: [dp(25)]
+                canvas.after:
+                    Color:
+                        rgba: 0.35, 0.4, 1, 0.3
+                    Line:
+                        rounded_rectangle: (self.x, self.y, self.width, self.height, dp(25))
+                        width: 1.2
+
+        # Spacer between buttons
+        Widget:
+            size_hint_y: 0.05
+
+        # CLOSE button — rounded dark gray
+        AnchorLayout:
+            anchor_x: "center"
+            size_hint_y: 0.2 # Adjusted to balance proportions
+
+            Button:
+                text: "C L O S E"
+                font_size: "22dp"
+                bold: True
+                size_hint: 0.65, 1
+                color: 0.8, 0.8, 0.85, 1
+                background_color: 0, 0, 0, 0
+                background_normal: ""
+                on_press: root.parent.show_menu()
+                canvas.before:
+                    Color:
+                        rgba: 0.2, 0.2, 0.25, 1
+                    RoundedRectangle:
+                        pos: self.pos
+                        size: self.size
+                        radius: [dp(25)]
+                canvas.after:
+                    Color:
+                        rgba: 0.4, 0.4, 0.5, 0.3
+                    Line:
+                        rounded_rectangle: (self.x, self.y, self.width, self.height, dp(25))
+                        width: 1.2

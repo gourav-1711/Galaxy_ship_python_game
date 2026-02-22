@@ -1,0 +1,112 @@
+<MenuUi>:
+
+    # Top bar — high score + settings icon
+    BoxLayout:
+        orientation: "horizontal"
+        size_hint: 0.9, None
+        height: "45dp"
+        pos_hint: {"center_x": 0.5, "top": 0.97}
+        spacing: "10dp"
+
+        # High score display
+        BoxLayout:
+            orientation: "horizontal"
+            size_hint_x: 0.4
+            spacing: "5dp"
+            Image:
+                source: "assets/images/star_icon.png"
+                size_hint: None, None
+                size: "24dp", "24dp"
+                pos_hint: {"center_y": 0.5}
+            Label:
+                text: str(root.parent.main_high_score)
+                font_size: "16dp"
+                bold: True
+                color: 1, 0.85, 0.2, 1
+                halign: "left"
+                valign: "middle"
+                text_size: self.size
+
+        # Spacer
+        Widget:
+            size_hint_x: 1
+
+        # Settings icon
+        Image:
+            source: "assets/images/gear_icon.png"
+            size_hint: None, None
+            size: "32dp", "32dp"
+            pos_hint: {"center_y": 0.5}
+
+    # Main content area — centered vertically
+    BoxLayout:
+        orientation: "vertical"
+        size_hint: 0.7, 0.5
+        pos_hint: {"center_x": 0.5, "center_y": 0.5}
+        spacing: "12dp"
+
+        # Title: GALAXY
+        Label:
+            text: "G  A  L  A  X  Y"
+            font_size: "52dp"
+            font_name: "assets/fonts/Sackers-Gothic-Std-Light.ttf"
+            bold: True
+            color: 1, 1, 1, 1
+            size_hint_y: 0.35
+            halign: "center"
+            valign: "bottom"
+            text_size: self.size
+
+        # Blue accent line under title
+        Widget:
+            size_hint_y: None
+            height: "3dp"
+            canvas:
+                Color:
+                    rgba: 0.2, 0.3, 1, 1
+                RoundedRectangle:
+                    pos: self.center_x - dp(60), self.y
+                    size: dp(120), dp(3)
+                    radius: [2]
+
+        # Subtitle
+        Label:
+            text: "T H E   C O S M O S   A W A I T S"
+            font_size: "13dp"
+            color: 0.6, 0.6, 0.75, 0.7
+            size_hint_y: 0.15
+            halign: "center"
+            valign: "top"
+            text_size: self.size
+
+        # Spacer before button
+        Widget:
+            size_hint_y: 0.2
+
+        # START button — rounded, neon blue
+        AnchorLayout:
+            anchor_x: "center"
+            size_hint_y: 0.3
+
+            Button:
+                text: "S T A R T"
+                font_size: "22dp"
+                bold: True
+                size_hint: 0.85, 1
+                color: 1, 1, 1, 1
+                background_color: 0, 0, 0, 0
+                background_normal: ""
+                on_press: root.parent.game_start()
+                canvas.before:
+                    Color:
+                        rgba: 0.18, 0.22, 0.95, 1
+                    RoundedRectangle:
+                        pos: self.pos
+                        size: self.size
+                        radius: [dp(25)]
+                canvas.after:
+                    Color:
+                        rgba: 0.35, 0.4, 1, 0.3
+                    Line:
+                        rounded_rectangle: (self.x, self.y, self.width, self.height, dp(25))
+                        width: 1.2
