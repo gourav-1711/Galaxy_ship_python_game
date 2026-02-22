@@ -1,7 +1,7 @@
 from kivy.config import Config
-
 Config.set("graphics", "width", "900")
 Config.set("graphics", "height", "400")
+
 from kivy.app import App, Builder
 from kivy.clock import Clock
 from kivy.graphics import Color, Triangle
@@ -10,39 +10,22 @@ from kivy.properties import NumericProperty, BooleanProperty
 from kivy.core.window import Window
 from menu import MenuUi
 from kivy.properties import ObjectProperty
+
 from kivy.core.audio import SoundLoader
 
 Builder.load_file("menu.kv")
 Builder.load_file("restart.kv")
 from kivy.core.text import LabelBase, DEFAULT_FONT
-
+from kivy.storage.jsonstore import JsonStore
 LabelBase.register(DEFAULT_FONT, fn_regular="assets/fonts/Eurostile.ttf")
 
 
 class MainUi(RelativeLayout):
     from transform import transform, transform_2D, transform_perspective
-    from controls import (
-        is_desktop,
-        keyboard_closed,
-        on_keyboard_down,
-        on_keyboard_up,
-        on_touch_down,
-        on_touch_up,
-    )
-    from land_tiles import (
-        init_tiles,
-        update_tiles,
-        genrate_tiles_coordinates,
-        get_tile_coordinates,
-    )
-    from lines_gen import (
-        init_vertical_lines,
-        update_vetical_lines,
-        init_horizontal_lines,
-        update_horizontal_lines,
-        get_line_x_from_index,
-        get_line_y_from_index,
-    )
+    from audio import init_audio
+    from controls import (is_desktop,keyboard_closed,on_keyboard_down,on_keyboard_up,on_touch_down,on_touch_up)
+    from land_tiles import (init_tiles,update_tiles,genrate_tiles_coordinates,get_tile_coordinates)
+    from lines_gen import (init_vertical_lines,update_vetical_lines,init_horizontal_lines,update_horizontal_lines,get_line_x_from_index,get_line_y_from_index)
 
     menu = ObjectProperty()
     restart = ObjectProperty()
@@ -51,12 +34,12 @@ class MainUi(RelativeLayout):
     perspective_point_y = NumericProperty(0)
 
     vertical_lines = []
-    v_l_spacing = 0.25
-    v_l_number = 8
+    v_l_spacing = 0.45
+    v_l_number = 14
 
     horizontal_lines = []
-    h_l_spacing = 0.2
-    h_l_number = 15
+    h_l_spacing = 0.35
+    h_l_number = 17
 
     current_y_loop = 0
 
@@ -90,11 +73,16 @@ class MainUi(RelativeLayout):
     begin_sound = None
     game_music_sound = None
     restart_sound = None
+    menu_sound = None
+    click_sound = None
 
     def __init__(self, **kwargs):
         super().__init__(**kwargs)
         # print("MainUi initialized")
         # print(f"width: {self.width}, height: {self.height}")
+        self.store = JsonStore("high_score.json")
+        if self.store.exists("high_score"):
+            self.main_high_score = self.store.get("high_score")["high_score"]
         self.init_audio()
         self.init_vertical_lines()
         self.init_horizontal_lines()
@@ -102,6 +90,7 @@ class MainUi(RelativeLayout):
         self.genrate_tiles_coordinates()
         self.init_ship()
         self.galaxy_sound.play()
+        self.menu_sound.play()
 
         if self.is_desktop():
             self._keyboard = Window.request_keyboard(self.keyboard_closed, self)
@@ -114,6 +103,8 @@ class MainUi(RelativeLayout):
         self.reset_game()
         self.game_started = True
         self.menu.opacity = 0
+        self.menu_sound.stop()
+        self.click_sound.play()
         self.begin_sound.play()
         self.game_music_sound.play()
         self.game_music_sound.loop = True
@@ -128,6 +119,7 @@ class MainUi(RelativeLayout):
         # Update high score
         if self.high_score > self.main_high_score:
             self.main_high_score = self.high_score
+            self.store.put("high_score", high_score=self.high_score)
         # Show restart button
         self.restart.opacity = 1
 
@@ -146,21 +138,19 @@ class MainUi(RelativeLayout):
         self.reset_game()
         self.menu.opacity = 1
         self.restart.opacity = 0
+        self.click_sound.play()
         Clock.schedule_once(lambda dt: self.game_music_sound.stop(), 0.1)
+        self.menu_sound.play()
 
     def reset_game(self):
-        # Reload short sounds to get fresh GStreamer pipelines.
-        # GStreamer one-shot sounds can't replay reliably after stop() —
-        # reloading is the cleanest fix.
+        
         self.game_over_impact_sound = SoundLoader.load(
             "assets/audio/gameover_impact.wav"
         )
         self.game_over_impact_sound.volume = 0.35
         self.game_over_sound = SoundLoader.load("assets/audio/gameover_voice.wav")
         self.game_over_sound.volume = 0.35
-
-        # Stop music so a future menu sound can be played from show_menu()
-        # self.game_music_sound.stop()
+        
 
         self.tiles_coordinates = []
         self.current_y_loop = 0
@@ -188,14 +178,14 @@ class MainUi(RelativeLayout):
         xmin, ymin = self.get_tile_coordinates(ti_x, ti_y)
         xmax, ymax = self.get_tile_coordinates(ti_x + 1, ti_y + 1)
 
-        # ship_center_x , ship_center_y = self.ship_coordinates[1][0] , self.ship_coordinates[0][1]
-        # if ship_center_x >= xmin and ship_center_x <= xmax and ship_center_y >= ymin and ship_center_y <= ymax:
-        #     return True
+        ship_center_x , ship_center_y = self.ship_coordinates[1][0] , self.ship_coordinates[0][1]
+        if ship_center_x >= xmin and ship_center_x <= xmax and ship_center_y >= ymin and ship_center_y <= ymax:
+            return True
 
-        for i in range(3):
-            ship_x, ship_y = self.ship_coordinates[i]
-            if ship_x >= xmin and ship_x <= xmax and ship_y >= ymin and ship_y <= ymax:
-                return True
+        # for i in range(3):
+        #     ship_x, ship_y = self.ship_coordinates[i]
+        #     if ship_x >= xmin and ship_x <= xmax and ship_y >= ymin and ship_y <= ymax:
+        #         return True
         return False
 
     def init_ship(self):
@@ -217,34 +207,19 @@ class MainUi(RelativeLayout):
         x3, y3 = self.transform(*self.ship_coordinates[2])
         self.ship.points = [x1, y1, x2, y2, x3, y3]
 
-    def on_size(self, *args):
-        # print(f"width: {self.width}, height: {self.height}")
-        pass
+    # def on_size(self, *args):
+    #     # print(f"width: {self.width}, height: {self.height}")
+    #     pass
 
-    def on_perspective_point_x(self, widget, value):
-        # print(f"X: {value}")
-        pass
+    # def on_perspective_point_x(self, widget, value):
+    #     # print(f"X: {value}")
+    #     pass
 
-    def on_perspective_point_y(self, widget, value):
+    # def on_perspective_point_y(self, widget, value):
         # print(f"Y: {value}")
         pass
 
-    def init_audio(self):
-        self.begin_sound = SoundLoader.load("assets/audio/begin.wav")
-        self.galaxy_sound = SoundLoader.load("assets/audio/galaxy.wav")
-        self.game_over_impact_sound = SoundLoader.load(
-            "assets/audio/gameover_impact.wav"
-        )
-        self.game_over_sound = SoundLoader.load("assets/audio/gameover_voice.wav")
-        self.game_music_sound = SoundLoader.load("assets/audio/music1.wav")
-        self.restart_sound = SoundLoader.load("assets/audio/restart.wav")
-
-        self.game_music_sound.volume = 1
-        self.begin_sound.volume = 0.15
-        self.game_over_sound.volume = 0.35
-        self.galaxy_sound.volume = 0.15
-        self.game_over_impact_sound.volume = 0.35
-        self.restart_sound.volume = 0.5
+    
 
     def update(self, dt):
         # print(dt)
@@ -267,6 +242,10 @@ class MainUi(RelativeLayout):
                 # print(f"high score : {self.high_score}")
                 self.genrate_tiles_coordinates()
 
+                # INCREASING SPEED
+                self.SPEED += 0.0009
+                self.speed_x += 0.0002
+
             # VERTICAL SPEED
             speed_x = self.current_speed_x * self.width / 100
             self.offset_x += speed_x * time_factor
@@ -277,6 +256,7 @@ class MainUi(RelativeLayout):
             and not self.check_ship_collision()
             and not self.game_over_state
         ):
+            print(f"SPEED X: {self.current_speed_x} , SPEED Y: {self.SPEED}")
             # checking sound
             self.game_over_impact_sound.play()
             # self.galaxy_sound.play()
