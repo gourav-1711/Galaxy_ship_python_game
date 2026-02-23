@@ -31,12 +31,18 @@
         Widget:
             size_hint_x: 1
 
-        # Settings icon
-        Image:
-            source: "assets/images/gear_icon.png"
+        # Settings icon (clickable)
+        Button:
             size_hint: None, None
-            size: "32dp", "32dp"
+            size: "36dp", "36dp"
             pos_hint: {"center_y": 0.5}
+            background_normal: ""
+            background_color: 0, 0, 0, 0
+            on_press: root.parent.show_settings()
+            Image:
+                source: "assets/images/gear_icon.png"
+                size: self.parent.size
+                pos: self.parent.pos
 
     # Main content area — centered vertically
     BoxLayout:

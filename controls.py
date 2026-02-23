@@ -25,7 +25,7 @@ def on_keyboard_up(self, keyboard, keycode):
     return True
 
 def on_touch_down(self, touch):
-    if self.game_started and not self.game_over_state:
+    if self.game_started and not self.game_over_state and not self.game_paused:
         if touch.x < self.width / 2:
             self.current_speed_x = self.speed_x
         else:

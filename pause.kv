@@ -1,0 +1,75 @@
+<PauseScreen>:
+    opacity: 0
+
+    # Main content — centered
+    BoxLayout:
+        orientation: "vertical"
+        size_hint: 0.60, 0.55
+        pos_hint: {"center_x": 0.5, "center_y": 0.5}
+        spacing: "12dp"
+
+        # PAUSED title
+        Label:
+            text: "P A U S E D"
+            font_size: "44dp"
+            font_name: "assets/fonts/Sackers-Gothic-Std-Light.ttf"
+            bold: True
+            color: 1, 1, 1, 1
+            size_hint_y: 0.30
+            halign: "center"
+            valign: "bottom"
+            text_size: self.size
+
+        # Blue accent line
+        Widget:
+            size_hint_y: None
+            height: "3dp"
+            canvas:
+                Color:
+                    rgba: 0.2, 0.3, 1, 1
+                RoundedRectangle:
+                    pos: self.center_x - dp(60), self.y
+                    size: dp(120), dp(3)
+                    radius: [2]
+
+        # Subtitle
+        Label:
+            text: "T A K E   A   B R E A T H"
+            font_size: "13dp"
+            color: 0.6, 0.6, 0.75, 0.7
+            size_hint_y: 0.12
+            halign: "center"
+            valign: "top"
+            text_size: self.size
+
+        # Spacer
+        Widget:
+            size_hint_y: 0.1
+
+        # RESUME button — rounded neon blue
+        AnchorLayout:
+            anchor_x: "center"
+            size_hint_y: 0.25
+
+            Button:
+                text: "R E S U M E"
+                font_size: "22dp"
+                bold: True
+                size_hint: 0.75, 1
+                color: 1, 1, 1, 1
+                background_color: 0, 0, 0, 0
+                background_normal: ""
+                on_press: root.parent.toggle_pause()
+                canvas.before:
+                    Color:
+                        rgba: 0.18, 0.22, 0.95, 1
+                    RoundedRectangle:
+                        pos: self.pos
+                        size: self.size
+                        radius: [dp(25)]
+                canvas.after:
+                    Color:
+                        rgba: 0.35, 0.4, 1, 0.3
+                    Line:
+                        rounded_rectangle: (self.x, self.y, self.width, self.height, dp(25))
+                        width: 1.2

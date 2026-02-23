@@ -1,5 +1,7 @@
 #: import menu menu
 #: import restart restart
+#: import pause pause
+#: import settings settings
 MainUi:
 
 
@@ -8,6 +10,8 @@ MainUi:
     perspective_point_y: self.height * 0.75
     menu: menu_ui
     restart: restart_ui
+    pause_screen: pause_ui
+    settings_screen: settings_ui
     canvas.before:
         Rectangle:
             pos: self.pos
@@ -25,16 +29,19 @@ MainUi:
     Button:
         id: pause_btn
         size_hint: None, None
-        size: "50dp", "50dp"
+        size: "40dp", "40dp"
         pos_hint: {"right": 0.99, "top": 0.97}
         opacity: 1 if root.game_started and not root.game_over_state else 0
         disabled: not (root.game_started and not root.game_over_state)
-        background_normal: "assets/images/pause_bars_icon_1771746320371.png"
-        background_down: "assets/images/pause_bars_icon_1771746320371.png"
-        background_color: 0, 0, 0, 0
+        background_normal: "assets/images/bars.png"
+        background_down: "assets/images/bars.png"
+        background_color: 1, 1, 1, 1
         on_press: root.toggle_pause()
     MenuUi:
         id: menu_ui
     RestartScreen:
         id: restart_ui
-    
+    PauseScreen:
+        id: pause_ui
+    SettingsScreen:
+        id: settings_ui

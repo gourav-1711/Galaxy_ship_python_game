@@ -1,4 +1,5 @@
 from kivy.config import Config
+
 Config.set("graphics", "width", "900")
 Config.set("graphics", "height", "400")
 
@@ -6,35 +7,65 @@ from kivy.app import App, Builder
 from kivy.clock import Clock
 from kivy.graphics import Color, Triangle
 from kivy.uix.relativelayout import RelativeLayout
-from kivy.properties import NumericProperty, BooleanProperty
+from kivy.properties import NumericProperty, BooleanProperty, ListProperty
 from kivy.core.window import Window
 from menu import MenuUi
+from pause import PauseScreen
+from settings import SettingsScreen
 from kivy.properties import ObjectProperty
 
 from kivy.core.audio import SoundLoader
 
 Builder.load_file("menu.kv")
 Builder.load_file("restart.kv")
+Builder.load_file("pause.kv")
+Builder.load_file("settings.kv")
 from kivy.core.text import LabelBase, DEFAULT_FONT
 from kivy.storage.jsonstore import JsonStore
+
 LabelBase.register(DEFAULT_FONT, fn_regular="assets/fonts/Eurostile.ttf")
 
 
 class MainUi(RelativeLayout):
     from transform import transform, transform_2D, transform_perspective
     from audio import init_audio
-    from controls import (is_desktop,keyboard_closed,on_keyboard_down,on_keyboard_up,on_touch_down,on_touch_up)
-    from land_tiles import (init_tiles,update_tiles,genrate_tiles_coordinates,get_tile_coordinates)
-    from lines_gen import (init_vertical_lines,update_vetical_lines,init_horizontal_lines,update_horizontal_lines,get_line_x_from_index,get_line_y_from_index)
+    from controls import (
+        is_desktop,
+        keyboard_closed,
+        on_keyboard_down,
+        on_keyboard_up,
+        on_touch_down,
+        on_touch_up,
+    )
+    from land_tiles import (
+        init_tiles,
+        update_tiles,
+        genrate_tiles_coordinates,
+        get_tile_coordinates,
+    )
+    from lines_gen import (
+        init_vertical_lines,
+        update_vetical_lines,
+        init_horizontal_lines,
+        update_horizontal_lines,
+        get_line_x_from_index,
+        get_line_y_from_index,
+    )
 
     menu = ObjectProperty()
     restart = ObjectProperty()
+    pause_screen = ObjectProperty()
+    settings_screen = ObjectProperty()
 
     perspective_point_x = NumericProperty(0)
     perspective_point_y = NumericProperty(0)
 
+    lines_color = ListProperty([1, 1, 1, 1])
+    tiles_color = ListProperty([1, 1, 1, 1])
+    ship_color = ListProperty([1, 0, 0, 1])
+
     vertical_lines = []
-    v_l_spacing = 0.45
+    v_l_spacing = 0.65
     v_l_number = 14
 
     horizontal_lines = []
@@ -80,9 +111,17 @@ class MainUi(RelativeLayout):
         super().__init__(**kwargs)
         # print("MainUi initialized")
         # print(f"width: {self.width}, height: {self.height}")
-        self.store = JsonStore("high_score.json")
-        if self.store.exists("high_score"):
-            self.main_high_score = self.store.get("high_score")["high_score"]
+        self.high_score_store = JsonStore("high_score.json")
+        self.color_store = JsonStore("color.json")
+
+        if self.high_score_store.exists("high_score"):
+            self.main_high_score = self.high_score_store.get("high_score")["high_score"]
+
+        if self.color_store.exists("lines_color"):
+            self.lines_color = self.color_store.get("lines_color")["lines_color"]
+            self.tiles_color = self.color_store.get("tiles_color")["tiles_color"]
+            self.ship_color = self.color_store.get("ship_color")["ship_color"]
+
         self.init_audio()
         self.init_vertical_lines()
         self.init_horizontal_lines()
@@ -110,6 +149,8 @@ class MainUi(RelativeLayout):
         self.game_music_sound.loop = True
         self.game_music_sound.volume = 1
         self.restart.opacity = 0
+        self.pause_screen.opacity = 0
+        self.settings_screen.opacity = 0
 
     def game_over(self):
         # Play game over sound after 0.5 seconds
@@ -119,7 +160,7 @@ class MainUi(RelativeLayout):
         # Update high score
         if self.high_score > self.main_high_score:
             self.main_high_score = self.high_score
-            self.store.put("high_score", high_score=self.high_score)
+            self.high_score_store.put("high_score", high_score=self.high_score)
         # Show restart button
         self.restart.opacity = 1
 
@@ -131,26 +172,34 @@ class MainUi(RelativeLayout):
         self.game_paused = not self.game_paused
         if self.game_paused:
             self.game_music_sound.volume = 0.2
+            self.pause_screen.opacity = 1
         else:
             self.game_music_sound.volume = 1
+            self.pause_screen.opacity = 0
 
     def show_menu(self):
         self.reset_game()
         self.menu.opacity = 1
         self.restart.opacity = 0
+        self.pause_screen.opacity = 0
+        self.settings_screen.opacity = 0
         self.click_sound.play()
         Clock.schedule_once(lambda dt: self.game_music_sound.stop(), 0.1)
         self.menu_sound.play()
 
+    def show_settings(self):
+        self.menu.opacity = 0
+        self.settings_screen.opacity = 1
+        self.click_sound.play()
+
     def reset_game(self):
-        
+
         self.game_over_impact_sound = SoundLoader.load(
             "assets/audio/gameover_impact.wav"
         )
         self.game_over_impact_sound.volume = 0.35
         self.game_over_sound = SoundLoader.load("assets/audio/gameover_voice.wav")
         self.game_over_sound.volume = 0.35
-        
 
         self.tiles_coordinates = []
         self.current_y_loop = 0
@@ -161,6 +210,7 @@ class MainUi(RelativeLayout):
         self.offset_x = 0
         self.high_score = 0
         self.game_started = False
+        self.game_paused = False
         self.genrate_tiles_coordinates()
 
         self.game_over_state = False
@@ -178,8 +228,16 @@ class MainUi(RelativeLayout):
         xmin, ymin = self.get_tile_coordinates(ti_x, ti_y)
         xmax, ymax = self.get_tile_coordinates(ti_x + 1, ti_y + 1)
 
-        ship_center_x , ship_center_y = self.ship_coordinates[1][0] , self.ship_coordinates[0][1]
-        if ship_center_x >= xmin and ship_center_x <= xmax and ship_center_y >= ymin and ship_center_y <= ymax:
+        ship_center_x, ship_center_y = (
+            self.ship_coordinates[1][0],
+            self.ship_coordinates[0][1],
+        )
+        if (
+            ship_center_x >= xmin
+            and ship_center_x <= xmax
+            and ship_center_y >= ymin
+            and ship_center_y <= ymax
+        ):
             return True
 
         # for i in range(3):
@@ -190,10 +248,11 @@ class MainUi(RelativeLayout):
 
     def init_ship(self):
         with self.canvas:
-            Color(1, 0, 0)
+            self.ship_color_instruction = Color(*self.ship_color[:3])
             self.ship = Triangle()
 
     def update_ship(self):
+        self.ship_color_instruction.rgb = self.ship_color[:3]
         center_x = self.width / 2
         base_y = self.ship_base_y * self.height
         width_half = self.ship_width * self.width / 2
@@ -207,19 +266,17 @@ class MainUi(RelativeLayout):
         x3, y3 = self.transform(*self.ship_coordinates[2])
         self.ship.points = [x1, y1, x2, y2, x3, y3]
 
-    # def on_size(self, *args):
-    #     # print(f"width: {self.width}, height: {self.height}")
-    #     pass
+        # def on_size(self, *args):
+        #     # print(f"width: {self.width}, height: {self.height}")
+        #     pass
 
-    # def on_perspective_point_x(self, widget, value):
-    #     # print(f"X: {value}")
-    #     pass
+        # def on_perspective_point_x(self, widget, value):
+        #     # print(f"X: {value}")
+        #     pass
 
-    # def on_perspective_point_y(self, widget, value):
+        # def on_perspective_point_y(self, widget, value):
         # print(f"Y: {value}")
         pass
-
-    
 
     def update(self, dt):
         # print(dt)
@@ -241,10 +298,11 @@ class MainUi(RelativeLayout):
                 self.high_score += 1
                 # print(f"high score : {self.high_score}")
                 self.genrate_tiles_coordinates()
-
+                # DECREASING TILES SPACE
+                self.v_l_spacing -= 0.0002
                 # INCREASING SPEED
-                self.SPEED += 0.0009
-                self.speed_x += 0.0002
+                self.SPEED += 0.005
+                self.speed_x += 0.0008
 
             # VERTICAL SPEED
             speed_x = self.current_speed_x * self.width / 100
