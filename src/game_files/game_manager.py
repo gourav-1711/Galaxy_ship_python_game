@@ -1,6 +1,7 @@
 from kivy.clock import Clock
 from kivy.core.audio import SoundLoader
 
+
 def game_start(self):
     self.reset_game()
     self.game_started = True
@@ -15,6 +16,7 @@ def game_start(self):
     self.pause_screen.opacity = 0
     self.settings_screen.opacity = 0
 
+
 def game_over(self):
     # Play game over sound after 0.5 seconds
     Clock.schedule_once(self.play_game_over_sound, 0.5)
@@ -27,11 +29,14 @@ def game_over(self):
     # Show restart button
     self.restart.opacity = 1
 
+
 def play_game_over_sound(self, dt):
     if self.game_over_state:
         self.game_over_sound.play()
 
+
 def toggle_pause(self):
+    self.click_sound.play()
     self.game_paused = not self.game_paused
     if self.game_paused:
         self.game_music_sound.volume = 0.2
@@ -39,6 +44,7 @@ def toggle_pause(self):
     else:
         self.game_music_sound.volume = 1
         self.pause_screen.opacity = 0
+
 
 def show_menu(self):
     self.reset_game()
@@ -50,16 +56,16 @@ def show_menu(self):
     Clock.schedule_once(lambda dt: self.game_music_sound.stop(), 0.1)
     self.menu_sound.play()
 
+
 def show_settings(self):
     self.menu.opacity = 0
     self.settings_screen.opacity = 1
     self.click_sound.play()
 
+
 def reset_game(self):
 
-    self.game_over_impact_sound = SoundLoader.load(
-        "assets/audio/gameover_impact.wav"
-    )
+    self.game_over_impact_sound = SoundLoader.load("assets/audio/gameover_impact.wav")
     self.game_over_impact_sound.volume = 0.35
     self.game_over_sound = SoundLoader.load("assets/audio/gameover_voice.wav")
     self.game_over_sound.volume = 0.35

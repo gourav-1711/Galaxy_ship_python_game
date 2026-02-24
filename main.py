@@ -5,21 +5,22 @@ Config.set("graphics", "height", "400")
 
 from kivy.app import App, Builder
 from kivy.clock import Clock
+
 # from kivy.graphics import Color, Triangle
 from kivy.uix.relativelayout import RelativeLayout
 from kivy.properties import NumericProperty, BooleanProperty, ListProperty
 from kivy.core.window import Window
-from menu import MenuUi
-from pause import PauseScreen
-from settings import SettingsScreen
+from src.screens.menu import MenuUi
+from src.screens.pause import PauseScreen
+from src.screens.settings import SettingsScreen
 from kivy.properties import ObjectProperty
 
-from kivy.core.audio import SoundLoader
+# from kivy.core.audio import SoundLoader
 
-Builder.load_file("menu.kv")
-Builder.load_file("restart.kv")
-Builder.load_file("pause.kv")
-Builder.load_file("settings.kv")
+Builder.load_file("src/screens/menu.kv")
+Builder.load_file("src/screens/restart.kv")
+Builder.load_file("src/screens/pause.kv")
+Builder.load_file("src/screens/settings.kv")
 from kivy.core.text import LabelBase, DEFAULT_FONT
 from kivy.storage.jsonstore import JsonStore
 
@@ -27,9 +28,9 @@ LabelBase.register(DEFAULT_FONT, fn_regular="assets/fonts/Eurostile.ttf")
 
 
 class MainUi(RelativeLayout):
-    from transform import transform, transform_2D, transform_perspective
-    from audio import init_audio
-    from controls import (
+    from src.game_files.transform import transform, transform_2D, transform_perspective
+    from src.game_files.audio import init_audio
+    from src.game_files.controls import (
         is_desktop,
         keyboard_closed,
         on_keyboard_down,
@@ -37,13 +38,13 @@ class MainUi(RelativeLayout):
         on_touch_down,
         on_touch_up,
     )
-    from land_tiles import (
+    from src.game_files.land_tiles import (
         init_tiles,
         update_tiles,
         genrate_tiles_coordinates,
         get_tile_coordinates,
     )
-    from lines_gen import (
+    from src.game_files.lines_gen import (
         init_vertical_lines,
         update_vetical_lines,
         init_horizontal_lines,
@@ -51,20 +52,20 @@ class MainUi(RelativeLayout):
         get_line_x_from_index,
         get_line_y_from_index,
     )
-    from game_manager import (
+    from src.game_files.game_manager import (
         game_start,
         game_over,
         play_game_over_sound,
         reset_game,
         toggle_pause,
         show_menu,
-        show_settings
+        show_settings,
     )
-    from ship import (
+    from src.game_files.ship import (
         init_ship,
         update_ship,
         check_ship_collision,
-        check_ship_collision_with_tile
+        check_ship_collision_with_tile,
     )
 
     menu = ObjectProperty()

@@ -75,6 +75,7 @@ class SettingsScreen(RelativeLayout):
         self.save_colors()
 
     def go_back(self):
+        self.parent.click_sound.play()
         self.opacity = 0
         self.parent.menu.opacity = 1
 
