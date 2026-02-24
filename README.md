@@ -35,13 +35,15 @@ Galaxy Ship is an endless runner-style arcade game where you pilot a ship down a
 
 ---
 
-## 📸 Screenshots
+## Screenshots
 
-> _Coming soon — run the game and see for yourself!_
+![Main Game Screen](screenshot/main.png)
+
+_Main gameplay showing the 3D perspective scrolling and ship navigation_
 
 ---
 
-## 🛠️ Installation
+## Installation
 
 ### Prerequisites
 
@@ -73,13 +75,13 @@ python main.py
 
 ## 🎯 How to Play
 
-| Control         | Action         |
-|-----------------|----------------|
-| `A` / `←`       | Move Left      |
-| `D` / `→`       | Move Right     |
-| Touch (left)    | Move Left      |
-| Touch (right)   | Move Right     |
-| Pause Button    | Pause / Resume |
+| Control       | Action         |
+| ------------- | -------------- |
+|  `←`     | Move Left      |
+|  `→`     | Move Right     |
+| Touch (left)  | Move Left      |
+| Touch (right) | Move Right     |
+| Pause Button  | Pause / Resume |
 
 **Objective:** Stay on the tiles and survive as long as possible. The speed increases and the path narrows — how far can you go?
 
@@ -135,13 +137,13 @@ Galaxy_ship_python_game/
 
 ## 🧰 Tech Stack
 
-| Technology | Purpose |
-|------------|---------|
-| **Python 3.12** | Core language |
-| **Kivy 2.3.1** | Cross-platform UI framework |
-| **Kivy KV Language** | Declarative UI layouts |
-| **JsonStore** | Persistent settings & high scores |
-| **uv** | Package management |
+| Technology           | Purpose                           |
+| -------------------- | --------------------------------- |
+| **Python 3.12**      | Core language                     |
+| **Kivy 2.3.1**       | Cross-platform UI framework       |
+| **Kivy KV Language** | Declarative UI layouts            |
+| **JsonStore**        | Persistent settings & high scores |
+| **uv**               | Package management                |
 
 ---
 
