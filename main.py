@@ -1,7 +1,21 @@
+import sys
+import os
+
+# PyInstaller --onefile extracts to a temp dir; chdir there so all relative paths work
+if getattr(sys, "frozen", False):
+    # writable dir = folder the .exe lives in (for saving user data)
+    EXE_DIR = os.path.dirname(sys.executable)
+    os.chdir(sys._MEIPASS)
+    # Force SDL2 audio — GStreamer isn't properly bundled by PyInstaller
+    os.environ["KIVY_AUDIO"] = "sdl2"
+else:
+    EXE_DIR = os.path.dirname(os.path.abspath(__file__))
+
 from kivy.config import Config
 
 Config.set("graphics", "width", "900")
 Config.set("graphics", "height", "400")
+
 
 from kivy.app import App, Builder
 from kivy.clock import Clock
@@ -127,8 +141,8 @@ class MainUi(RelativeLayout):
         super().__init__(**kwargs)
         # print("MainUi initialized")
         # print(f"width: {self.width}, height: {self.height}")
-        self.high_score_store = JsonStore("high_score.json")
-        self.color_store = JsonStore("color.json")
+        self.high_score_store = JsonStore(os.path.join(EXE_DIR, "high_score.json"))
+        self.color_store = JsonStore(os.path.join(EXE_DIR, "color.json"))
 
         if self.high_score_store.exists("high_score"):
             self.main_high_score = self.high_score_store.get("high_score")["high_score"]
