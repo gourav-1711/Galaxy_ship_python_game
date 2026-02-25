@@ -1,6 +1,5 @@
 import sys
 import os
-
 # PyInstaller --onefile extracts to a temp dir; chdir there so all relative paths work
 if getattr(sys, "frozen", False):
     # writable dir = folder the .exe lives in (for saving user data)

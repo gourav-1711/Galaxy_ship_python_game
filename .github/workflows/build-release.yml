@@ -2,8 +2,10 @@ name: Build Android APK
 
 on:
   push:
+    branches:
+      - main
     tags:
-      - "v*"
+      - 'v*'
   workflow_dispatch:
 
 permissions:
@@ -45,7 +47,7 @@ jobs:
       - name: Install Buildozer
         run: |
           python3 -m pip install --upgrade pip
-          pip install buildozer cython
+          pip install buildozer cython==0.29.36
 
       - name: Build APK
         env:
